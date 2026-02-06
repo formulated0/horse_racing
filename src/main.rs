@@ -15,8 +15,16 @@ fn setup(mut commands: Commands) {
 		Sprite {color: Color::WHITE, custom_size: Some(Vec2::new(30.0,30.0)), ..default()},
 		Transform::from_translation(Vec3::new(-500.0, 0.0, 0.0))
 	)).insert((
-			Horse {}, BaseStats { speed: 100.0, stamina: 10.0, power: 10.0, guts: 10.0, wit: 10.0 }, Velocity { value: Vec3::new(100.0, 0.0, 0.0) }
+			Horse {}, BaseStats { speed: 100.0, stamina: 10.0, power: 10.0, guts: 10.0, wit: 10.0 }, RaceState { distance_traveled: 0.0, lane_index: 0, current_speed: 400.0}
 	));
+
+	commands.spawn((
+		Sprite {color: Color::WHITE, custom_size: Some(Vec2::new(30.0,30.0)), ..default()},
+		Transform::from_translation(Vec3::new(-500.0, 0.0, 0.0))
+	)).insert((
+			Horse {}, BaseStats { speed: 100.0, stamina: 10.0, power: 10.0, guts: 10.0, wit: 10.0 }, RaceState { distance_traveled: 0.0, lane_index: 1, current_speed: 410.0}
+	));
+
 }
 
 fn main() {

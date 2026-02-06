@@ -14,6 +14,8 @@ pub struct BaseStats {
 }
 
 #[derive(Component)]
-pub struct Velocity {
-	pub value: Vec3
+pub struct RaceState {
+	pub distance_traveled: f32,
+	pub lane_index: usize,
+	pub current_speed: f32
 }
