@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 
 #[derive(Component)]
-pub struct Horse {
-}
+pub struct Horse {}
 
 #[derive(Component)]
 pub struct BaseStats {
@@ -19,3 +18,9 @@ pub struct RaceState {
 	pub lane_index: usize,
 	pub current_speed: f32
 }
+
+#[derive(Component)]
+pub struct HorseNumber(pub usize);
+
+#[derive(Component)]
+pub struct PlayerFocus {}
