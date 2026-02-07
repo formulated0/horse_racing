@@ -1,24 +1,23 @@
-use bevy::prelude::*;
 use crate::components::*;
+use bevy::prelude::*;
 
 pub fn camera_switching(
-	keys: Res<ButtonInput<KeyCode>>, 
-	mut commands: Commands, 
-	query: Query<(Entity, &HorseNumber)>
+    keys: Res<ButtonInput<KeyCode>>,
+    mut commands: Commands,
+    query: Query<(Entity, &HorseNumber)>,
 ) {
-	let mut target_num: Option<usize> = None;
-	if keys.just_pressed(KeyCode::Digit1) {
-		target_num = Some(0);
-	}
-	else if keys.just_pressed(KeyCode::Digit2) {
-		target_num = Some(1);
-	}
+    let mut target_num: Option<usize> = None;
+    if keys.just_pressed(KeyCode::Digit1) {
+        target_num = Some(0);
+    } else if keys.just_pressed(KeyCode::Digit2) {
+        target_num = Some(1);
+    }
 
-	let Some(target) = target_num else {
+    let Some(target) = target_num else {
         return;
     };
 
-	for (entity, horse_number) in query.iter() {
+    for (entity, horse_number) in query.iter() {
         if horse_number.0 == target {
             commands.entity(entity).insert(PlayerFocus {});
         } else {

@@ -16,7 +16,9 @@ pub struct BaseStats {
 pub struct RaceState {
 	pub distance_traveled: f32,
 	pub lane_index: usize,
-	pub current_speed: f32
+	pub current_speed: f32,
+	pub current_stamina: f32,
+	pub phase: RaceState,
 }
 
 #[derive(Component)]
@@ -24,3 +26,10 @@ pub struct HorseNumber(pub usize);
 
 #[derive(Component)]
 pub struct PlayerFocus {}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RacePhase {
+    Start,
+    Middle,
+    LastSpurt,
+}
