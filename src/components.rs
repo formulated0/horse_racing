@@ -51,8 +51,9 @@ pub enum RunStrategy {
     EndCloser,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum DistanceType {
+	#[default]
     Sprint, // < 1400
     Mile,   // 1401 - 1800
     Medium, // 1801 - 2400
@@ -96,3 +97,36 @@ pub struct DistanceAptitude {
 
 #[derive(Component)]
 pub struct OnMainMenuScreen {}
+
+#[derive(Component)]
+pub struct TrackButton(pub DistanceType);
+
+pub struct TrackMetadata {
+    pub name: &'static str,
+    pub length: f32,
+}
+
+impl DistanceType {
+    pub fn get_tracks(&self) -> Vec<TrackMetadata> {
+        match self {
+            DistanceType::Sprint => vec![
+                TrackMetadata { name: "Niigata Straight", length: 1000.0 },
+                TrackMetadata { name: "Chukyo", length: 1200.0 },
+            ],
+            DistanceType::Mile => vec![
+                TrackMetadata { name: "Tokyo", length: 1600.0 },
+                TrackMetadata { name: "Hanshin", length: 1600.0 },
+            ],
+            DistanceType::Medium => vec![
+                TrackMetadata { name: "Satsuki Sho", length: 2000.0 },
+                TrackMetadata { name: "Tokyo (Derby)", length: 2400.0 },
+                TrackMetadata { name: "Hanshin (Takarazuka)", length: 2200.0 },
+            ],
+            DistanceType::Long => vec![
+                TrackMetadata { name: "Arima Kinen", length: 2500.0 },
+                TrackMetadata { name: "Kikuka Sho", length: 3000.0 },
+                TrackMetadata { name: "Tenno Sho (Spring)", length: 3200.0 },
+            ],
+        }
+    }
+}

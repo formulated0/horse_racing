@@ -9,6 +9,7 @@ use systems::race_logic::update_racer_stats;
 use ui::hud::*;
 use utils::track_math::get_track_position;
 use crate::resources::GameState;
+use crate::resources::RaceConfig;
 use crate::systems::race_logic;
 mod components;
 mod resources;
@@ -27,9 +28,9 @@ fn main() {
             }),
             ..default()
         }))
+		.add_plugins(ui::UiPluginStruct)
 		.init_state::<GameState>()
         .add_systems(Startup, setup)
-        .add_systems(Startup, setup_hud)
         .add_systems(Update, (
 			update_racer_stats, 
 			race_logic::horse_ai_logic, 
@@ -37,6 +38,7 @@ fn main() {
 		).chain())
         .add_systems(Update, (camera_follow, camera_switching))
         .add_systems(Update, update_hud)
+		.insert_resource(RaceConfig::default())
         .run();
 }
 
@@ -83,66 +85,66 @@ fn setup(
         proj
     }));
 
-    commands
-        .spawn((
-            Mesh2d(meshes.add(Circle::new(15.0))),
-            MeshMaterial2d(materials.add(ColorMaterial::from_color(RED))),
-            Transform::from_translation(Vec3::new(-500.0, 0.0, 0.0)),
-        ))
-        .insert((
-            Horse {},
-            HorseName("skibid".to_string()),
-            BaseStats {
-                speed: 1000.0,
-                stamina: 600.0,
-                power: 900.0,
-                guts: 10.0,
-                wit: 10.0,
-            },
-            RaceState {
-                distance_traveled: 0.0,
-                lane_position: 2.0,
-                target_lane: 2.0,
-                current_speed: 0.0,
-                current_stamina: 2480.0,
-                phase: RacePhase::Start,
-            },
-            HorseNumber(0),
-            PlayerFocus {},
-            RunStrategy::EndCloser,
-            create_aptitude(DistanceType::Medium),
-            Collider { radius: 15.0 },
-        ));
+    // commands
+    //     .spawn((
+    //         Mesh2d(meshes.add(Circle::new(15.0))),
+    //         MeshMaterial2d(materials.add(ColorMaterial::from_color(RED))),
+    //         Transform::from_translation(Vec3::new(-500.0, 0.0, 0.0)),
+    //     ))
+    //     .insert((
+    //         Horse {},
+    //         HorseName("skibid".to_string()),
+    //         BaseStats {
+    //             speed: 1000.0,
+    //             stamina: 600.0,
+    //             power: 900.0,
+    //             guts: 10.0,
+    //             wit: 10.0,
+    //         },
+    //         RaceState {
+    //             distance_traveled: 0.0,
+    //             lane_position: 2.0,
+    //             target_lane: 2.0,
+    //             current_speed: 0.0,
+    //             current_stamina: 2480.0,
+    //             phase: RacePhase::Start,
+    //         },
+    //         HorseNumber(0),
+    //         PlayerFocus {},
+    //         RunStrategy::EndCloser,
+    //         create_aptitude(DistanceType::Medium),
+    //         Collider { radius: 15.0 },
+    //     ));
 
-    commands
-        .spawn((
-            Mesh2d(meshes.add(Circle::new(15.0))),
-            MeshMaterial2d(materials.add(ColorMaterial::from_color(RED))),
-            Transform::from_translation(Vec3::new(-500.0, 0.0, 0.0)),
-        ))
-        .insert((
-            Horse {},
-            HorseName("JE_Vacation".to_string()),
-            BaseStats {
-                speed: 400.0,
-                stamina: 300.0,
-                power: 300.0,
-                guts: 10.0,
-                wit: 10.0,
-            },
-            RaceState {
-                distance_traveled: 0.0,
-                lane_position: 0.0,
-                target_lane: 0.0,
-                current_speed: 0.0,
-                current_stamina: 2240.0,
-                phase: RacePhase::Start,
-            },
-            HorseNumber(1),
-            RunStrategy::FrontRunner,
-            create_aptitude(DistanceType::Sprint),
-            Collider { radius: 15.0 },
-        ));
+    // commands
+    //     .spawn((
+    //         Mesh2d(meshes.add(Circle::new(15.0))),
+    //         MeshMaterial2d(materials.add(ColorMaterial::from_color(RED))),
+    //         Transform::from_translation(Vec3::new(-500.0, 0.0, 0.0)),
+    //     ))
+    //     .insert((
+    //         Horse {},
+    //         HorseName("JE_Vacation".to_string()),
+    //         BaseStats {
+    //             speed: 400.0,
+    //             stamina: 300.0,
+    //             power: 300.0,
+    //             guts: 10.0,
+    //             wit: 10.0,
+    //         },
+    //         RaceState {
+    //             distance_traveled: 0.0,
+    //             lane_position: 0.0,
+    //             target_lane: 0.0,
+    //             current_speed: 0.0,
+    //             current_stamina: 2240.0,
+    //             phase: RacePhase::Start,
+    //         },
+    //         HorseNumber(1),
+    //         RunStrategy::FrontRunner,
+    //         create_aptitude(DistanceType::Sprint),
+    //         Collider { radius: 15.0 },
+    //     ));
 }
 
 fn create_aptitude(best_dist: DistanceType) -> DistanceAptitude {
