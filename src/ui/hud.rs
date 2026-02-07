@@ -26,15 +26,16 @@ pub fn setup_hud(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 pub fn update_hud(
-    horse_q: Query<(&RaceState, &BaseStats), With<PlayerFocus>>,
+    horse_q: Query<(&RaceState, &BaseStats, &HorseName), With<PlayerFocus>>,
     text_q: Query<Entity, With<DebugText>>,
     mut text_writer: TextWriter<Text>,
 ) {
-    let Ok((state, stats)) = horse_q.single() else { return };
+    let Ok((state, stats, name)) = horse_q.single() else { return };
     let Ok(text_entity) = text_q.single() else { return };
 
     *text_writer.text(text_entity, 0) = format!(
-        "Speed: {:.1} m/s\nStamina: {:.1}/{:.1}\nDist: {:.1}m",
+        "Name: {}\nSpeed: {:.1} m/s\nStamina: {:.1}/{:.1}\nDist: {:.1}m",
+		name.0,
         state.current_speed,
         state.current_stamina,
         stats.stamina,

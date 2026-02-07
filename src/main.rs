@@ -1,82 +1,16 @@
 use bevy::prelude::*;
 use bevy::window::WindowResolution;
 use components::*;
-use systems::movement::move_horses;
 use systems::camera::*;
+use systems::movement::move_horses;
 use systems::race_logic::update_racer_stats;
 use ui::hud::*;
+use utils::track_math::get_track_position;
 mod components;
 mod resources;
 mod systems;
 mod ui;
 mod utils;
-
-fn setup(mut commands: Commands) {
-    commands
-		.spawn(Camera2d)
-		.insert(Projection::Orthographic({
-			let mut proj = OrthographicProjection::default_2d();
-			proj.scale = 0.8;
-			proj
-    }));
-
-    commands
-        .spawn((
-            Sprite {
-                color: Color::WHITE,
-                custom_size: Some(Vec2::new(30.0, 30.0)),
-                ..default()
-            },
-            Transform::from_translation(Vec3::new(-500.0, 0.0, 0.0)),
-        ))
-        .insert((
-            Horse {},
-            BaseStats {
-                speed: 1000.0,
-                stamina: 600.0,
-                power: 900.0,
-                guts: 10.0,
-                wit: 10.0,
-            },
-            RaceState {
-                distance_traveled: 0.0,
-                lane_index: 0,
-                current_speed: 0.0,
-				current_stamina: 2480.0,
-				phase: Start,
-            },
-            HorseNumber(0),
-            PlayerFocus {},
-        ));
-
-    commands
-        .spawn((
-            Sprite {
-                color: Color::WHITE,
-                custom_size: Some(Vec2::new(30.0, 30.0)),
-                ..default()
-            },
-            Transform::from_translation(Vec3::new(-500.0, 0.0, 0.0)),
-        ))
-        .insert((
-            Horse {},
-            BaseStats {
-                speed: 400.0,
-                stamina: 300.0,
-                power: 300.0,
-                guts: 10.0,
-                wit: 10.0,
-            },
-            RaceState {
-                distance_traveled: 0.0,
-                lane_index: 1,
-                current_speed: 0.0,
-				current_stamina: 2240.0,
-				phase: Start,
-            },
-            HorseNumber(1),
-        ));
-}
 
 fn main() {
     App::new()
@@ -90,9 +24,145 @@ fn main() {
             ..default()
         }))
         .add_systems(Startup, setup)
-		.add_systems(Startup, setup_hud)
+        .add_systems(Startup, setup_hud)
         .add_systems(Update, (update_racer_stats, move_horses).chain())
-		.add_systems(Update, (camera_follow, camera_switching))
-		.add_systems(Update, update_hud)
+        .add_systems(Update, (camera_follow, camera_switching))
+        .add_systems(Update, update_hud)
         .run();
+}
+
+fn draw_track_rails(commands: &mut Commands) {
+    let track_length = 2000.0 + (2.0 * std::f32::consts::PI * 200.0); // approx total length
+    let step = 20.0; // draw a dot every 20m
+
+    
+    for i in 0..(track_length as i32 / step as i32) {
+        let dist = i as f32 * step;
+
+        // INNER RAIL
+        let pos_inner = get_track_position(dist, 0);
+        commands
+			.spawn((
+				Sprite {
+					color: Color::WHITE,
+					custom_size: Some(Vec2::new(5.0, 5.0)),
+					..default()
+				},
+				Transform::from_translation(pos_inner),
+			));
+
+        
+        // OUTER RAIL
+        let pos_outer = get_track_position(dist, 8);
+        commands
+			.spawn((
+				Sprite {
+					color: Color::WHITE,
+					custom_size: Some(Vec2::new(5.0, 5.0)),
+					..default()
+				},
+				Transform::from_translation(pos_outer),
+			));
+    }
+}
+
+fn setup(mut commands: Commands) {
+	draw_track_rails(&mut commands);
+    commands.spawn(Camera2d).insert(Projection::Orthographic({
+        let mut proj = OrthographicProjection::default_2d();
+        proj.scale = 0.8;
+        proj
+    }));
+
+    commands
+        .spawn((
+            Sprite {
+                color: Color::WHITE,
+                custom_size: Some(Vec2::new(30.0, 30.0)),
+                ..default()
+            },
+            Transform::from_translation(Vec3::new(-500.0, 0.0, 0.0)),
+        ))
+        .insert((
+            Horse {},
+			HorseName("skibid".to_string()),
+            BaseStats {
+                speed: 1000.0,
+                stamina: 600.0,
+                power: 900.0,
+                guts: 10.0,
+                wit: 10.0,
+            },
+            RaceState {
+                distance_traveled: 0.0,
+                lane_index: 2,
+                current_speed: 0.0,
+                current_stamina: 2480.0,
+                phase: RacePhase::Start,
+            },
+            HorseNumber(0),
+            PlayerFocus {},
+            RunStrategy::EndCloser,
+			create_aptitude(DistanceType::Medium)
+        ));
+
+    commands
+        .spawn((
+            Sprite {
+                color: Color::BLACK,
+                custom_size: Some(Vec2::new(30.0, 30.0)),
+                ..default()
+            },
+            Transform::from_translation(Vec3::new(-500.0, 0.0, 0.0)),
+        ))
+        .insert((
+            Horse {},
+			HorseName("JE_Vacation".to_string()),
+            BaseStats {
+                speed: 400.0,
+                stamina: 300.0,
+                power: 300.0,
+                guts: 10.0,
+                wit: 10.0,
+            },
+            RaceState {
+                distance_traveled: 0.0,
+                lane_index: 0,
+                current_speed: 0.0,
+                current_stamina: 2240.0,
+                phase: RacePhase::Start,
+            },
+            HorseNumber(1),
+            RunStrategy::FrontRunner,
+			create_aptitude(DistanceType::Sprint)
+        ));
+}
+
+fn create_aptitude(best_dist: DistanceType) -> DistanceAptitude {
+	match best_dist {
+        DistanceType::Sprint => DistanceAptitude {
+            sprint: AptitudeGrade::A,
+            mile: AptitudeGrade::B,
+            medium: AptitudeGrade::E,
+            long: AptitudeGrade::G,
+        },
+        DistanceType::Mile => DistanceAptitude {
+            sprint: AptitudeGrade::B,
+            mile: AptitudeGrade::A,
+            medium: AptitudeGrade::B,
+            long: AptitudeGrade::E,
+        },
+        DistanceType::Medium => DistanceAptitude {
+            sprint: AptitudeGrade::E,
+            mile: AptitudeGrade::B,
+            medium: AptitudeGrade::A,
+            long: AptitudeGrade::B,
+        },
+        DistanceType::Long => DistanceAptitude {
+            sprint: AptitudeGrade::G,
+            mile: AptitudeGrade::E,
+            medium: AptitudeGrade::B,
+            long: AptitudeGrade::A,
+        },
+    }
 }
