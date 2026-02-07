@@ -93,3 +93,6 @@ pub struct DistanceAptitude {
     pub medium: AptitudeGrade,
     pub long: AptitudeGrade,
 }
+
+#[derive(Component)]
+pub struct OnMainMenuScreen {}

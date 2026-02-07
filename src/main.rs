@@ -8,6 +8,7 @@ use systems::movement::move_horses;
 use systems::race_logic::update_racer_stats;
 use ui::hud::*;
 use utils::track_math::get_track_position;
+use crate::resources::GameState;
 use crate::systems::race_logic;
 mod components;
 mod resources;
@@ -26,6 +27,7 @@ fn main() {
             }),
             ..default()
         }))
+		.init_state::<GameState>()
         .add_systems(Startup, setup)
         .add_systems(Startup, setup_hud)
         .add_systems(Update, (
