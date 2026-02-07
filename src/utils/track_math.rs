@@ -4,9 +4,9 @@ pub const STRAIGHT_LENGTH: f32 = 800.0;
 pub const TURN_RADIUS: f32 = 200.0;
 pub const LANE_WIDTH: f32 = 30.0;
 
-pub fn get_track_position(distance: f32, lane: usize) -> Vec3 {
+pub fn get_track_position(distance: f32, lane: f32) -> Vec3 {
     // radius for specific horse only
-    let radius = TURN_RADIUS + (lane as f32 * LANE_WIDTH);
+    let radius = TURN_RADIUS + (lane * LANE_WIDTH);
 
     // how long one lap is for THIS SPECIFIC LANE
     let curve_length = std::f32::consts::PI * radius;

@@ -8,20 +8,26 @@ pub struct HorseName(pub String);
 
 #[derive(Component)]
 pub struct BaseStats {
-	pub speed: f32,
-	pub stamina: f32,
-	pub power: f32,
-	pub guts: f32,
-	pub wit: f32
+    pub speed: f32,
+    pub stamina: f32,
+    pub power: f32,
+    pub guts: f32,
+    pub wit: f32,
 }
 
 #[derive(Component)]
 pub struct RaceState {
-	pub distance_traveled: f32,
-	pub lane_index: usize,
-	pub current_speed: f32,
-	pub current_stamina: f32,
-	pub phase: RacePhase,
+    pub distance_traveled: f32,
+    pub lane_position: f32,
+    pub target_lane: f32,
+    pub current_speed: f32,
+    pub current_stamina: f32,
+    pub phase: RacePhase,
+}
+
+#[derive(Component)]
+pub struct Collider {
+    pub radius: f32,
 }
 
 #[derive(Component)]
@@ -55,7 +61,14 @@ pub enum DistanceType {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AptitudeGrade {
-    S, A, B, C, D, E, F, G
+    S,
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+    G,
 }
 
 impl AptitudeGrade {
