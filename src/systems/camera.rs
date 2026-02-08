@@ -7,10 +7,24 @@ pub fn camera_switching(
     query: Query<(Entity, &HorseNumber)>,
 ) {
     let mut target_num: Option<usize> = None;
-    if keys.just_pressed(KeyCode::Digit1) {
-        target_num = Some(0);
-    } else if keys.just_pressed(KeyCode::Digit2) {
-        target_num = Some(1);
+    for i in 0..10 {
+        let key = match i {
+            0 => KeyCode::Digit1,
+            1 => KeyCode::Digit2,
+            2 => KeyCode::Digit3,
+            3 => KeyCode::Digit4,
+            4 => KeyCode::Digit5,
+            5 => KeyCode::Digit6,
+            6 => KeyCode::Digit7,
+            7 => KeyCode::Digit8,
+            8 => KeyCode::Digit9,
+            9 => KeyCode::Digit0,
+            _ => continue,
+        };
+        if keys.just_pressed(key) {
+            target_num = Some(i);
+            break;
+        }
     }
 
     let Some(target) = target_num else {

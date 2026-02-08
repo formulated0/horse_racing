@@ -1,12 +1,42 @@
 use bevy::prelude::*;
 
+pub struct TrackMetadata {
+    pub name: &'static str,
+    pub length: f32,
+}
+
+impl DistanceType {
+    pub fn get_tracks(&self) -> Vec<TrackMetadata> {
+        match self {
+            DistanceType::Sprint => vec![
+                TrackMetadata { name: "Niigata Straight", length: 1000.0 },
+                TrackMetadata { name: "Chukyo", length: 1200.0 },
+            ],
+            DistanceType::Mile => vec![
+                TrackMetadata { name: "Tokyo", length: 1600.0 },
+                TrackMetadata { name: "Hanshin", length: 1600.0 },
+            ],
+            DistanceType::Medium => vec![
+                TrackMetadata { name: "Satsuki Sho", length: 2000.0 },
+                TrackMetadata { name: "Tokyo (Derby)", length: 2400.0 },
+                TrackMetadata { name: "Hanshin (Takarazuka)", length: 2200.0 },
+            ],
+            DistanceType::Long => vec![
+                TrackMetadata { name: "Arima Kinen", length: 2500.0 },
+                TrackMetadata { name: "Kikuka Sho", length: 3000.0 },
+                TrackMetadata { name: "Tenno Sho (Spring)", length: 3200.0 },
+            ],
+        }
+    }
+}
+
 #[derive(Component)]
 pub struct Horse {}
 
 #[derive(Component)]
 pub struct HorseName(pub String);
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct BaseStats {
     pub speed: f32,
     pub stamina: f32,
@@ -87,7 +117,7 @@ impl AptitudeGrade {
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy)]
 pub struct DistanceAptitude {
     pub sprint: AptitudeGrade,
     pub mile: AptitudeGrade,
@@ -101,32 +131,11 @@ pub struct OnMainMenuScreen {}
 #[derive(Component)]
 pub struct TrackButton(pub DistanceType);
 
-pub struct TrackMetadata {
-    pub name: &'static str,
-    pub length: f32,
-}
+#[derive(Component)]
+pub struct HorseSelectButton(pub usize);
 
-impl DistanceType {
-    pub fn get_tracks(&self) -> Vec<TrackMetadata> {
-        match self {
-            DistanceType::Sprint => vec![
-                TrackMetadata { name: "Niigata Straight", length: 1000.0 },
-                TrackMetadata { name: "Chukyo", length: 1200.0 },
-            ],
-            DistanceType::Mile => vec![
-                TrackMetadata { name: "Tokyo", length: 1600.0 },
-                TrackMetadata { name: "Hanshin", length: 1600.0 },
-            ],
-            DistanceType::Medium => vec![
-                TrackMetadata { name: "Satsuki Sho", length: 2000.0 },
-                TrackMetadata { name: "Tokyo (Derby)", length: 2400.0 },
-                TrackMetadata { name: "Hanshin (Takarazuka)", length: 2200.0 },
-            ],
-            DistanceType::Long => vec![
-                TrackMetadata { name: "Arima Kinen", length: 2500.0 },
-                TrackMetadata { name: "Kikuka Sho", length: 3000.0 },
-                TrackMetadata { name: "Tenno Sho (Spring)", length: 3200.0 },
-            ],
-        }
-    }
-}
+#[derive(Component)]
+pub struct HorseStatsPanel{}
+
+#[derive(Component)]
+pub struct StartRaceButton{}

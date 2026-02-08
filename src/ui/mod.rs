@@ -1,7 +1,7 @@
 use crate::GameState;
 use crate::components::{self, OnMainMenuScreen};
 use crate::resources::RaceConfig;
-use crate::ui::menu::{track_len_button_interaction, track_specific_button_interaction};
+use crate::ui::menu::*;
 use bevy::app::{App, Plugin, Update};
 use bevy::ecs::schedule::IntoScheduleConfigs;
 use bevy::ecs::system::Commands;
@@ -24,6 +24,10 @@ impl Plugin for UiPluginStruct {
 			OnEnter(GameState::TrackList), 
 			menu::setup_track_list
 		);
+		app.add_systems(
+			OnEnter(GameState::HorseSelect),
+			menu::setup_horse_select
+		);
         app.add_systems(
             OnExit(GameState::TrackLengthSelect),
             menu::despawn_screen::<OnMainMenuScreen>,
@@ -40,6 +44,13 @@ impl Plugin for UiPluginStruct {
             Update,
             track_specific_button_interaction.run_if(in_state(GameState::TrackList)),
         );
-		
+		app.add_systems(
+            Update,
+			horse_select_interaction.run_if(in_state(GameState::HorseSelect))
+		);
+		app.add_systems(
+            Update,
+			start_button_interaction.run_if(in_state(GameState::HorseSelect))
+		);
     }
 }

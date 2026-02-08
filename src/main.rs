@@ -1,3 +1,8 @@
+use crate::resources::GameState;
+use crate::resources::HorseTemplate;
+use crate::resources::RaceConfig;
+use crate::resources::SelectedHorses;
+use crate::systems::race_logic;
 use bevy::color::palettes::css::*;
 use bevy::prelude::*;
 use bevy::sprite::*;
@@ -8,9 +13,6 @@ use systems::movement::move_horses;
 use systems::race_logic::update_racer_stats;
 use ui::hud::*;
 use utils::track_math::get_track_position;
-use crate::resources::GameState;
-use crate::resources::RaceConfig;
-use crate::systems::race_logic;
 mod components;
 mod resources;
 mod systems;
@@ -28,21 +30,26 @@ fn main() {
             }),
             ..default()
         }))
-		.add_plugins(ui::UiPluginStruct)
-		.init_state::<GameState>()
+        .add_plugins(ui::UiPluginStruct)
+        .init_state::<GameState>()
         .add_systems(Startup, setup)
-        .add_systems(Update, (
-			update_racer_stats, 
-			race_logic::horse_ai_logic, 
-			move_horses
-		).chain())
+        .add_systems(
+            Update,
+            (update_racer_stats, race_logic::horse_ai_logic, move_horses).chain(),
+        )
         .add_systems(Update, (camera_follow, camera_switching))
         .add_systems(Update, update_hud)
-		.insert_resource(RaceConfig::default())
+        .add_systems(
+            OnEnter(GameState::Racing),
+            (spawn_selected_horses, draw_track_rails),
+        )
+        .add_systems(Startup, ui::hud::setup_hud)
+        .insert_resource(RaceConfig::default())
+        .insert_resource(SelectedHorses::default())
         .run();
 }
 
-fn draw_track_rails(commands: &mut Commands) {
+fn draw_track_rails(mut commands: Commands) {
     let track_length = 2000.0 + (2.0 * std::f32::consts::PI * 200.0); // approx total length
     let step = 20.0; // draw a dot every 20m
 
@@ -78,73 +85,11 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    draw_track_rails(&mut commands);
     commands.spawn(Camera2d).insert(Projection::Orthographic({
         let mut proj = OrthographicProjection::default_2d();
         proj.scale = 0.8;
         proj
     }));
-
-    // commands
-    //     .spawn((
-    //         Mesh2d(meshes.add(Circle::new(15.0))),
-    //         MeshMaterial2d(materials.add(ColorMaterial::from_color(RED))),
-    //         Transform::from_translation(Vec3::new(-500.0, 0.0, 0.0)),
-    //     ))
-    //     .insert((
-    //         Horse {},
-    //         HorseName("skibid".to_string()),
-    //         BaseStats {
-    //             speed: 1000.0,
-    //             stamina: 600.0,
-    //             power: 900.0,
-    //             guts: 10.0,
-    //             wit: 10.0,
-    //         },
-    //         RaceState {
-    //             distance_traveled: 0.0,
-    //             lane_position: 2.0,
-    //             target_lane: 2.0,
-    //             current_speed: 0.0,
-    //             current_stamina: 2480.0,
-    //             phase: RacePhase::Start,
-    //         },
-    //         HorseNumber(0),
-    //         PlayerFocus {},
-    //         RunStrategy::EndCloser,
-    //         create_aptitude(DistanceType::Medium),
-    //         Collider { radius: 15.0 },
-    //     ));
-
-    // commands
-    //     .spawn((
-    //         Mesh2d(meshes.add(Circle::new(15.0))),
-    //         MeshMaterial2d(materials.add(ColorMaterial::from_color(RED))),
-    //         Transform::from_translation(Vec3::new(-500.0, 0.0, 0.0)),
-    //     ))
-    //     .insert((
-    //         Horse {},
-    //         HorseName("JE_Vacation".to_string()),
-    //         BaseStats {
-    //             speed: 400.0,
-    //             stamina: 300.0,
-    //             power: 300.0,
-    //             guts: 10.0,
-    //             wit: 10.0,
-    //         },
-    //         RaceState {
-    //             distance_traveled: 0.0,
-    //             lane_position: 0.0,
-    //             target_lane: 0.0,
-    //             current_speed: 0.0,
-    //             current_stamina: 2240.0,
-    //             phase: RacePhase::Start,
-    //         },
-    //         HorseNumber(1),
-    //         RunStrategy::FrontRunner,
-    //         create_aptitude(DistanceType::Sprint),
-    //         Collider { radius: 15.0 },
-    //     ));
 }
 
 fn create_aptitude(best_dist: DistanceType) -> DistanceAptitude {
@@ -173,5 +118,50 @@ fn create_aptitude(best_dist: DistanceType) -> DistanceAptitude {
             medium: AptitudeGrade::B,
             long: AptitudeGrade::A,
         },
+    }
+}
+
+fn spawn_selected_horses(
+    mut commands: Commands,
+    selected: Res<SelectedHorses>,
+    config: Res<RaceConfig>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    let templates = HorseTemplate::get_all();
+
+    for (i, &horse_idx) in selected.0.iter().enumerate() {
+        let horse = &templates[horse_idx];
+        let start_lane = i as f32;
+        let start_y = start_lane * 30.0;
+        let max_hp = 0.8 * horse.stats.stamina + config.length;
+
+        commands
+            .spawn((
+                Mesh2d(meshes.add(Circle::new(15.0))),
+                MeshMaterial2d(materials.add(ColorMaterial::from_color(horse.color))),
+                Transform::from_translation(Vec3::new(-500.0, start_y, 0.0)),
+            ))
+            .insert((
+                Horse {},
+                HorseNumber(i),
+                HorseName(horse.name.to_string().clone()),
+                horse.stats.clone(),
+                RaceState {
+                    distance_traveled: 0.0,
+                    lane_position: start_lane,
+                    target_lane: start_lane,
+                    current_speed: 0.0,
+                    current_stamina: max_hp,
+                    phase: RacePhase::Start,
+                },
+                horse.strategy.clone(),
+                Collider { radius: 15.0 },
+            ));
+
+        if i == 0 {
+            let entity_id = commands.spawn_empty().id();
+            commands.entity(entity_id).insert(PlayerFocus {});
+        }
     }
 }
